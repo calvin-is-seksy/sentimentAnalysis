@@ -8,8 +8,8 @@ class MN_NaiveBayes:
         self.pos_count = count(pos)
         self.neg_count = count(neg)
         self.doc_count = self.pos_count + self.neg_count
-        self.pos = pos
-        self.neg = neg
+        self.pos = pos #unique words in positive dataset 
+        self.neg = neg # same ^ 
 
     def train(self):
         self.features = {}

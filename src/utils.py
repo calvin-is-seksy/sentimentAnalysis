@@ -76,6 +76,8 @@ def countTrainTFIDF():
     return cnt_pos, cnt_neg, IDF
 
 def count(pol_dict):
+    # returns the count of total number of words per the dataset 
+
     counter = 0
     for entry in pol_dict:
         counter += int(pol_dict[entry])
