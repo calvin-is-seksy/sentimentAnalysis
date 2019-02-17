@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-
+"""
+mnb - bow
+"""
 import math
 from utils import *
 

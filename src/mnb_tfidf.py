@@ -1,22 +1,20 @@
 #!/usr/bin/env python3
+"""
+mnb - tfidf
+"""
 
 import math
 from utils import *
 
 class TF_IDF:
-    def __init__(self, pos, neg):
+    def __init__(self, pos, neg, occur, numReviews):
         self.pos_count = count(pos)
         self.neg_count = count(neg)
         self.doc_count = self.pos_count + self.neg_count
         self.pos = pos
         self.neg = neg
-
-    """
-    tf-idf setup: 
-    
-    tf: # times term appears in review / total # terms in review 
-    idf: # log(# docs / # docs term appeared in)
-    """
+        self.occur = occur
+        self.numReviews = numReviews
 
     def train(self):
         self.features = {}
@@ -32,13 +30,16 @@ class TF_IDF:
         for each class.
         Backslashes in calculations are added for readiblity and serve as 
         line breaks.
-        """ # TODO: Refactor this into TFIDF
+        """
         for word, count in self.pos.items():
-            self.features['posFeatures'][word] = math.log((int(count) + 1) \
-                                                          / (self.pos_count + self.doc_count))
+            TF = count / self.pos_count
+            IDF = math.log(self.numReviews / self.occur[word])
+            self.features['posFeatures'][word] = TF * IDF
+
         for word, count in self.neg.items():
-            self.features['negFeatures'][word] = math.log((int(count) + 1) \
-                                                          / (self.neg_count + self.doc_count))
+            TF = count / self.neg_count
+            IDF = math.log(self.numReviews / self.occur[word])
+            self.features['negFeatures'][word] = TF * IDF
 
     """
     Takes a given test document and make a classification decision based off

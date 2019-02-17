@@ -43,29 +43,29 @@ def countTrainTFIDF():
     """
         takes file and returns the counter object (word, n_appearance) of whole document
         ADDITIONALLY: returns a dictionary of the # reviews the term appears in
-        :param filenames:
-        :return:
-        """
+    """
     cnt_pos = Counter()
     cnt_neg = Counter()
-    IDF = {}
+    occurrence = {}
+    numReviews = 0
     for line in lines(data_dir + filenames[0]):
         words = line.strip().split()
         cnt_pos.update(words)
         for word in words:
-            if word in IDF:
-                IDF[word] += 1
+            if word in occurrence:
+                occurrence[word] += 1
             else:
-                IDF[word] = 1
+                occurrence[word] = 1
 
     for line in lines(data_dir + filenames[1]):
+        numReviews += 1
         words = line.strip().split()
         cnt_neg.update(words)
         for word in words:
-            if word in IDF:
-                IDF[word] += 1
+            if word in occurrence:
+                occurrence[word] += 1
             else:
-                IDF[word] = 1
+                occurrence[word] = 1
 
     for word in cnt_pos:
         cnt_pos[word] += 1
@@ -73,10 +73,10 @@ def countTrainTFIDF():
     for word in cnt_neg:
         cnt_neg[word] += 1
 
-    return cnt_pos, cnt_neg, IDF
+    return cnt_pos, cnt_neg, occurrence, numReviews
 
 def count(pol_dict):
-    # returns the count of total number of words per the dataset 
+    # returns the count of total number of words in the dataset
 
     counter = 0
     for entry in pol_dict:
