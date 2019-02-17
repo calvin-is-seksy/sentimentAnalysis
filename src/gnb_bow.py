@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
 """
-mnb - tfidf
+gnb- bow
 """
-
 import math
 from utils import *
 
-class TF_IDF:
-    def __init__(self, pos, neg, occurPos, occurNeg, numReviews):
+class GNB_BOW:
+    def __init__(self, pos, neg, occurPerReviewPos, occurPerReviewNeg, numReviews):
         self.pos_count = count(pos)
         self.neg_count = count(neg)
         self.doc_count = self.pos_count + self.neg_count
         self.pos = pos
         self.neg = neg
-        self.occurPos = occurPos
-        self.occurNeg = occurNeg
+        self.occurPos = occurPerReviewPos
+        self.occurNeg = occurPerReviewNeg
         self.numReviews = numReviews
 
     def train(self):
@@ -33,14 +32,14 @@ class TF_IDF:
         line breaks.
         """
         for word, count in self.pos.items():
-            TF = count / self.pos_count
-            IDF = math.log(self.numReviews / self.occurPos[word])
-            self.features['posFeatures'][word] = TF * IDF
+            mean = (0.5*count) / self.numReviews
+            stddev = math.sqrt(sum([pow(x-mean,2) for x in self.occurPos[word]])/float(len(self.occurPos[word]))) # TODO: subtract 1 in denom?
+            self.features['posFeatures'][word] = [mean, stddev]
 
         for word, count in self.neg.items():
-            TF = count / self.neg_count
-            IDF = math.log(self.numReviews / self.occurNeg[word])
-            self.features['negFeatures'][word] = TF * IDF
+            mean = (0.5*count) / self.numReviews
+            stddev = math.sqrt(sum([pow(x-mean,2) for x in self.occurNeg[word]])/float(len(self.occurNeg[word]))) # TODO: subtract 1 in denom?
+            self.features['negFeatures'][word] = [mean, stddev]
 
     """
     Takes a given test document and make a classification decision based off
@@ -49,6 +48,10 @@ class TF_IDF:
     return: A two-tuple with the classification decision and its corresponding
     log-space probability.
     """
+    def calculateProbability(self, x, mean, stdev):
+        exponent = math.exp(-(math.pow(x - mean, 2) / (2 * math.pow(stdev, 2))))
+        return (1 / (math.sqrt(2 * math.pi) * stdev)) * exponent
+
     def testHelper(self, validationSet, posTestCount, negTestCount):
         pos_val = self.priorLogPos
         neg_val = self.priorLogNeg
@@ -65,13 +68,15 @@ class TF_IDF:
                 if feature == 'posFeatures':
                     for word in words:
                         if word in self.features['posFeatures']:
-                            pos_val += self.features['posFeatures'][word]
+                            mean, stddev = self.features['posFeatures'][word]
+                            pos_val += self.calculateProbability(word, mean, stddev)
                         elif word in self.features['negFeatures']:
                             pos_val += smooth_pos
                 elif feature == 'negFeatures':
                     for word in words:
                         if word in self.features['negFeatures']:
-                            neg_val += self.features['negFeatures'][word]
+                            mean, stddev = self.features['negFeatures'][word]
+                            neg_val += self.calculateProbability(word, mean, stddev)
                         elif word in self.features['posFeatures']:
                             neg_val += smooth_neg
 
