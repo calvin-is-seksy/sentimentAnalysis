@@ -20,6 +20,9 @@ class GNB_BOW:
         self.features = {}
         self.features['posFeatures'] = {}
         self.features['negFeatures'] = {}
+        self.weights = {}
+        self.weights['pos'] = {}
+        self.weights['neg'] = {}
 
         # Gathering a priori probabilities by class
         self.priorLogPos = math.log(self.pos_count / self.doc_count)
@@ -32,14 +35,28 @@ class GNB_BOW:
         line breaks.
         """
         for word, count in self.pos.items():
-            mean = (0.5*count) / self.numReviews
-            stddev = math.sqrt(sum([pow(x-mean,2) for x in self.occurPos[word]])/float(len(self.occurPos[word]))) # TODO: subtract 1 in denom?
-            self.features['posFeatures'][word] = [mean, stddev]
-
+            self.features['posFeatures'][word] = math.log((int(count) + 1) \
+                                                          / (self.pos_count + self.doc_count))
         for word, count in self.neg.items():
-            mean = (0.5*count) / self.numReviews
-            stddev = math.sqrt(sum([pow(x-mean,2) for x in self.occurNeg[word]])/float(len(self.occurNeg[word]))) # TODO: subtract 1 in denom?
-            self.features['negFeatures'][word] = [mean, stddev]
+            self.features['negFeatures'][word] = math.log((int(count) + 1) \
+                                                          / (self.neg_count + self.doc_count))
+
+        self.weights['pos']['mean'] = sum(self.features['posFeatures'].values()) / len(self.features['posFeatures'])
+        self.weights['neg']['mean'] = sum(self.features['negFeatures'].values()) / len(self.features['negFeatures'])
+
+        # TODO: FINISH THE VARIANCE PART ! 
+        self.weights['pos']['stddev'] = math.sqrt(sum([pow(x-self.weights['pos']['mean'],2) for x in self.occurPos[word]]) \
+                                                  / float(len(self.occurPos[word]))) # TODO: subtract 1 in denom?
+
+        # for word, count in self.pos.items():
+        #     mean = (0.5*count) / self.numReviews
+        #     stddev = math.sqrt(sum([pow(x-mean,2) for x in self.occurPos[word]])/float(len(self.occurPos[word]))) # TODO: subtract 1 in denom?
+        #     self.features['posFeatures'][word] = [mean, stddev]
+        #
+        # for word, count in self.neg.items():
+        #     mean = (0.5*count) / self.numReviews
+        #     stddev = math.sqrt(sum([pow(x-mean,2) for x in self.occurNeg[word]])/float(len(self.occurNeg[word]))) # TODO: subtract 1 in denom?
+        #     self.features['negFeatures'][word] = [mean, stddev]
 
     """
     Takes a given test document and make a classification decision based off
