@@ -88,6 +88,8 @@ def countTraining_gnb_bow():
     cnt_neg = Counter()
     occurPerReviewPos = {}
     occurPerReviewNeg = {}
+    occurrencePos = {}
+    occurrenceNeg = {}
     numReviews = 0
     for line in lines(data_dir + filenames[0]):
         tempCounter = Counter()
@@ -100,6 +102,11 @@ def countTraining_gnb_bow():
                 occurPerReviewPos[word].append(numOccur)
             else:
                 occurPerReviewPos[word] = [numOccur]
+        for word in set(words):
+            if word in occurrencePos:
+                occurrencePos[word] += 1
+            else:
+                occurrencePos[word] = 1
 
     for line in lines(data_dir + filenames[1]):
         tempCounter = Counter()
@@ -112,6 +119,11 @@ def countTraining_gnb_bow():
                 occurPerReviewNeg[word].append(numOccur)
             else:
                 occurPerReviewNeg[word] = [numOccur]
+        for word in set(words):
+            if word in occurrenceNeg:
+                occurrenceNeg[word] += 1
+            else:
+                occurrenceNeg[word] = 1
 
     for word in cnt_pos:
         cnt_pos[word] += 1
@@ -119,7 +131,7 @@ def countTraining_gnb_bow():
     for word in cnt_neg:
         cnt_neg[word] += 1
 
-    return cnt_pos, cnt_neg, occurPerReviewPos, occurPerReviewNeg, numReviews
+    return cnt_pos, cnt_neg, occurPerReviewPos, occurPerReviewNeg, numReviews, occurrencePos, occurrenceNeg
 
 def count(pol_dict):
     # returns the count of total number of words in the dataset

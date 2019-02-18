@@ -41,22 +41,16 @@ class GNB_BOW:
             self.features['negFeatures'][word] = math.log((int(count) + 1) \
                                                           / (self.neg_count + self.doc_count))
 
-        self.weights['pos']['mean'] = sum(self.features['posFeatures'].values()) / len(self.features['posFeatures'])
-        self.weights['neg']['mean'] = sum(self.features['negFeatures'].values()) / len(self.features['negFeatures'])
+        self.weights['pos']['mean'] = sum(self.features['posFeatures'].values()) / float(len(self.features['posFeatures']))
+        self.weights['neg']['mean'] = sum(self.features['negFeatures'].values()) / float(len(self.features['negFeatures']))
 
-        # TODO: FINISH THE VARIANCE PART ! 
-        self.weights['pos']['stddev'] = math.sqrt(sum([pow(x-self.weights['pos']['mean'],2) for x in self.occurPos[word]]) \
-                                                  / float(len(self.occurPos[word]))) # TODO: subtract 1 in denom?
+        self.weights['pos']['stddev'] = math.sqrt(sum([pow(x-self.weights['pos']['mean'],2) \
+                                            for x in self.features['posFeatures'].values()]) \
+                                            / float(len(self.features['posFeatures'])))
 
-        # for word, count in self.pos.items():
-        #     mean = (0.5*count) / self.numReviews
-        #     stddev = math.sqrt(sum([pow(x-mean,2) for x in self.occurPos[word]])/float(len(self.occurPos[word]))) # TODO: subtract 1 in denom?
-        #     self.features['posFeatures'][word] = [mean, stddev]
-        #
-        # for word, count in self.neg.items():
-        #     mean = (0.5*count) / self.numReviews
-        #     stddev = math.sqrt(sum([pow(x-mean,2) for x in self.occurNeg[word]])/float(len(self.occurNeg[word]))) # TODO: subtract 1 in denom?
-        #     self.features['negFeatures'][word] = [mean, stddev]
+        self.weights['neg']['stddev'] = math.sqrt(sum([pow(x - self.weights['neg']['mean'], 2) \
+                                                       for x in self.features['negFeatures'].values()]) \
+                                                  / float(len(self.features['negFeatures'])))
 
     """
     Takes a given test document and make a classification decision based off
@@ -76,8 +70,8 @@ class GNB_BOW:
         # Smoothed probabilities are calculated below, these are used when a
         # word in the test document is not found in the given class but is found
         # in another class's feature dict
-        smooth_pos = math.log(1 / (self.pos_count + self.doc_count))
-        smooth_neg = math.log(1 / (self.neg_count + self.doc_count))
+        smooth_pos = math.log(1 / (self.pos_count + self.doc_count)) * .6
+        smooth_neg = math.log(1 / (self.neg_count + self.doc_count)) * .6
 
         for line in lines(data_dir + validationSet):
             words = line.strip().split()
@@ -85,37 +79,35 @@ class GNB_BOW:
                 if feature == 'posFeatures':
                     for word in words:
                         if word in self.features['posFeatures']:
-                            mean, stddev = self.features['posFeatures'][word]
-                            pos_val += self.calculateProbability(word, mean, stddev)
+                            bowCoeff = self.features['posFeatures'][word]
+                            mean = self.weights['pos']['mean']
+                            stddev = self.weights['pos']['stddev']
+                            pos_val += self.calculateProbability(bowCoeff, mean, stddev)
                         elif word in self.features['negFeatures']:
                             pos_val += smooth_pos
+
                 elif feature == 'negFeatures':
                     for word in words:
                         if word in self.features['negFeatures']:
-                            mean, stddev = self.features['negFeatures'][word]
-                            neg_val += self.calculateProbability(word, mean, stddev)
+                            bowCoeff = self.features['negFeatures'][word]
+                            mean = self.weights['neg']['mean']
+                            stddev = self.weights['neg']['stddev']
+                            neg_val += self.calculateProbability(bowCoeff, mean, stddev)
                         elif word in self.features['posFeatures']:
                             neg_val += smooth_neg
 
-                # print(pos_val, neg_val)
-
                 if pos_val > neg_val:
                     posTestCount += 1
-                    # print('pos', line)
                 elif neg_val > pos_val:
                     negTestCount += 1
-                    # print('neg', line)
                 else: # TODO: Reorg w assert before if
                     assert(pos_val != neg_val)
+
+            # break
 
         return(posTestCount, negTestCount)
 
     def test(self):
-        posTestCount, negTestCount = 0, 0
-
-        posTestCount, negTestCount = self.testHelper(filenames[2], posTestCount, negTestCount)
-        print(posTestCount,negTestCount)
-        posTestCount, negTestCount = self.testHelper(filenames[3], posTestCount, negTestCount)
-        print(posTestCount, negTestCount)
-
-        return(posTestCount, negTestCount)
+        TP, FN = self.testHelper(filenames[2], 0, 0)
+        FP, TN = self.testHelper(filenames[3], 0, 0)
+        return(TP, FN, FP, TN)

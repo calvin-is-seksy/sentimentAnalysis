@@ -56,8 +56,8 @@ class TF_IDF:
         # Smoothed probabilities are calculated below, these are used when a
         # word in the test document is not found in the given class but is found
         # in another class's feature dict
-        smooth_pos = math.log(1 / (self.pos_count + self.doc_count))
-        smooth_neg = math.log(1 / (self.neg_count + self.doc_count))
+        smooth_pos = math.log(1 / (self.pos_count + self.doc_count)) * .05
+        smooth_neg = math.log(1 / (self.neg_count + self.doc_count)) * .05
 
         for line in lines(data_dir + validationSet):
             words = line.strip().split()
@@ -75,25 +75,16 @@ class TF_IDF:
                         elif word in self.features['posFeatures']:
                             neg_val += smooth_neg
 
-                # print(pos_val, neg_val)
-
                 if pos_val > neg_val:
                     posTestCount += 1
-                    # print('pos', line)
                 elif neg_val > pos_val:
                     negTestCount += 1
-                    # print('neg', line)
                 else: # TODO: Reorg w assert before if
                     assert(pos_val != neg_val)
 
         return(posTestCount, negTestCount)
 
     def test(self):
-        posTestCount, negTestCount = 0, 0
-
-        posTestCount, negTestCount = self.testHelper(filenames[2], posTestCount, negTestCount)
-        print(posTestCount,negTestCount)
-        posTestCount, negTestCount = self.testHelper(filenames[3], posTestCount, negTestCount)
-        print(posTestCount, negTestCount)
-
-        return(posTestCount, negTestCount)
+        TP, FN = self.testHelper(filenames[2], 0, 0)
+        FP, TN = self.testHelper(filenames[3], 0, 0)
+        return(TP, FN, FP, TN)
