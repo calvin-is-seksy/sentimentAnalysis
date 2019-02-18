@@ -6,7 +6,7 @@ mnb - tfidf
 import math
 from utils import *
 
-class TF_IDF:
+class MNB_TFIDF:
     def __init__(self, pos, neg, occurPos, occurNeg, numReviews):
         self.pos_count = count(pos)
         self.neg_count = count(neg)
@@ -84,7 +84,7 @@ class TF_IDF:
 
         return(posTestCount, negTestCount)
 
-    def test(self):
+    def test(self, filenames):
         TP, FN = self.testHelper(filenames[2], 0, 0)
         FP, TN = self.testHelper(filenames[3], 0, 0)
         return(TP, FN, FP, TN)

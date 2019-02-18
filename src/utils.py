@@ -3,10 +3,10 @@ from collections import Counter
 import math
 
 data_dir = "../data/"
-filenames = ["training_pos.txt",
-             "training_neg.txt",
-             "test_pos_public.txt",
-             "test_neg_public.txt"]
+# filenames = ["training_pos.txt",
+#              "training_neg.txt",
+#              "test_pos_public.txt",
+#              "test_neg_public.txt"]
 
 def lines(infile):
     with open(infile, 'r') as fp:
@@ -79,7 +79,7 @@ def countTrainTFIDF():
 
     return cnt_pos, cnt_neg, occurrencePos, occurrenceNeg, numReviews
 
-def countTraining_gnb_bow():
+def countTraining_gnb_bow(filenames):
     """
         takes file and returns the counter object (word, n_appearance) of whole document
         ADDITIONALLY: returns a dictionary of the # reviews the term appears in

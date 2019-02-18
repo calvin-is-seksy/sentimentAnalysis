@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 """
 mnb - bow
@@ -6,7 +5,7 @@ mnb - bow
 import math
 from utils import *
 
-class MN_NaiveBayes:
+class MNB_BOW:
     def __init__(self, pos, neg):
         self.pos_count = count(pos)
         self.neg_count = count(neg)
@@ -50,7 +49,7 @@ class MN_NaiveBayes:
         # Smoothed probabilities are calculated below, these are used when a
         # word in the test document is not found in the given class but is found
         # in another class's feature dict
-        smooth_pos = math.log(1 / (self.pos_count + self.doc_count)) 
+        smooth_pos = math.log(1 / (self.pos_count + self.doc_count))
         smooth_neg = math.log(1 / (self.neg_count + self.doc_count))
 
         for line in lines(data_dir + validationSet):
@@ -78,7 +77,7 @@ class MN_NaiveBayes:
 
         return(posTestCount, negTestCount)
 
-    def test(self):
+    def test(self, filenames):
         TP, FN = self.testHelper(filenames[2], 0, 0)
         FP, TN = self.testHelper(filenames[3], 0, 0)
         return(TP, FN, FP, TN)
