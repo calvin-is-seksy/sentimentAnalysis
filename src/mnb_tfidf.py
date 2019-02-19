@@ -8,9 +8,9 @@ from utils import *
 
 class MNB_TFIDF:
     def __init__(self, pos, neg, occurPos, occurNeg, numReviews):
-        self.pos_count = count(pos)
-        self.neg_count = count(neg)
-        self.doc_count = self.pos_count + self.neg_count
+        self.pCount = count(pos)
+        self.nCount = count(neg)
+        self.totalCount = self.pCount + self.nCount
         self.pos = pos
         self.neg = neg
         self.occurPos = occurPos
@@ -19,68 +19,51 @@ class MNB_TFIDF:
 
     def train(self):
         self.features = {}
-        self.features['posFeatures'] = {}
-        self.features['negFeatures'] = {}
+        self.features['pos'] = {}
+        self.features['neg'] = {}
 
-        # Gathering a priori probabilities by class
-        self.priorLogPos = math.log(self.pos_count / self.doc_count)
-        self.priorLogNeg = math.log(self.neg_count / self.doc_count)
+        self.priorP = math.log(self.pCount / self.totalCount)
+        self.priorN = math.log(self.nCount / self.totalCount)
 
-        """
-        Each for loop below is calculating probabilities of each feature
-        for each class.
-        Backslashes in calculations are added for readiblity and serve as 
-        line breaks.
-        """
         for word, count in self.pos.items():
-            TF = count / self.pos_count
+            TF = count / self.pCount
             IDF = math.log(self.numReviews / self.occurPos[word])
-            self.features['posFeatures'][word] = TF * IDF
+            self.features['pos'][word] = TF * IDF
 
         for word, count in self.neg.items():
-            TF = count / self.neg_count
+            TF = count / self.nCount
             IDF = math.log(self.numReviews / self.occurNeg[word])
-            self.features['negFeatures'][word] = TF * IDF
+            self.features['neg'][word] = TF * IDF
 
-    """
-    Takes a given test document and make a classification decision based off
-    of a max probability.
-    @param document: Test document used to make classification decision.
-    return: A two-tuple with the classification decision and its corresponding
-    log-space probability.
-    """
     def testHelper(self, validationSet, posTestCount, negTestCount):
-        pos_val = self.priorLogPos
-        neg_val = self.priorLogNeg
+        scoreP = self.priorP
+        scoreN = self.priorN
 
-        # Smoothed probabilities are calculated below, these are used when a
-        # word in the test document is not found in the given class but is found
-        # in another class's feature dict
-        smooth_pos = math.log(1 / (self.pos_count + self.doc_count)) * .05
-        smooth_neg = math.log(1 / (self.neg_count + self.doc_count)) * .05
+        penaltyPos = math.log(1 / (self.pCount + self.totalCount)) * .05
+        penaltyNeg = math.log(1 / (self.nCount + self.totalCount)) * .05
 
-        for line in lines(data_dir + validationSet):
+        for line in lines(validationSet):
             words = line.strip().split()
             for feature in self.features:
-                if feature == 'posFeatures':
+                if feature == 'pos':
                     for word in words:
-                        if word in self.features['posFeatures']:
-                            pos_val += self.features['posFeatures'][word]
-                        elif word in self.features['negFeatures']:
-                            pos_val += smooth_pos
-                elif feature == 'negFeatures':
+                        if word in self.features['pos']:
+                            scoreP += self.features['pos'][word]
+                        elif word in self.features['neg']:
+                            scoreP += penaltyPos
+                elif feature == 'neg':
                     for word in words:
-                        if word in self.features['negFeatures']:
-                            neg_val += self.features['negFeatures'][word]
-                        elif word in self.features['posFeatures']:
-                            neg_val += smooth_neg
+                        if word in self.features['neg']:
+                            scoreN += self.features['neg'][word]
+                        elif word in self.features['pos']:
+                            scoreN += penaltyNeg
 
-                if pos_val > neg_val:
-                    posTestCount += 1
-                elif neg_val > pos_val:
-                    negTestCount += 1
-                else: # TODO: Reorg w assert before if
-                    assert(pos_val != neg_val)
+            if scoreP > scoreN:
+                posTestCount += 1
+            elif scoreN > scoreP:
+                negTestCount += 1
+            else:
+                assert(scoreP != scoreN)
 
         return(posTestCount, negTestCount)
 
