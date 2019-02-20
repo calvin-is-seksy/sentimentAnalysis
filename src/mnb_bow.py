@@ -21,34 +21,41 @@ class MNB_BOW:
         self.priorP = math.log(self.pCount / self.totalCount)
         self.priorN = math.log(self.nCount / self.totalCount)
 
-        for word, count in self.pos.items():
-            self.features['pos'][word] = math.log((int(count) + 1) / (self.pCount + self.totalCount))
-        for word, count in self.neg.items():
-            self.features['neg'][word] = math.log((int(count) + 1) / (self.nCount + self.totalCount))
+        # BoW straight into Multinomial Naive Bayes Features found significant increase in accuracy with log probability
+        for w, c in self.pos.items():
+            self.features['pos'][w] = math.log((int(c) + 1) / (self.pCount + self.totalCount))
+        for w, c in self.neg.items():
+            self.features['neg'][w] = math.log((int(c) + 1) / (self.nCount + self.totalCount))
 
     def testHelper(self, validationSet, posTestCount, negTestCount):
         scoreP = self.priorP
         scoreN = self.priorN
-
         penaltyPos = math.log(1 / (self.pCount + self.totalCount))
         penaltyNeg = math.log(1 / (self.nCount + self.totalCount))
 
+        # print(penaltyPos, penaltyNeg)
 
         for line in lines(validationSet):
             words = line.strip().split()
             for feature in self.features:
                 if feature == 'pos':
                     for word in words:
+                        # print(scoreP)
                         if word in self.features['pos']:
                             scoreP += self.features['pos'][word]
                         elif word in self.features['neg']:
                             scoreP += penaltyPos
                 elif feature == 'neg':
+                    # print('\n\n\n')
                     for word in words:
+                        # print(scoreN)
                         if word in self.features['neg']:
                             scoreN += self.features['neg'][word]
                         elif word in self.features['pos']:
                             scoreN += penaltyNeg
+
+            # print(scoreP, scoreN)
+            # break
 
             if scoreP > scoreN:
                 posTestCount += 1

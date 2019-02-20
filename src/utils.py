@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 from collections import Counter
-import math
 
 def lines(infile):
     with open(infile, 'r') as fp:

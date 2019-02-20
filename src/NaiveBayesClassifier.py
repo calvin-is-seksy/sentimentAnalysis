@@ -21,23 +21,23 @@ def main(filenames):
 
     gnb_bow = GNB_BOW(pos, neg, numReviews)
     gnb_bow.train()
-    TP, FN, TN, FP = gnb_bow.test(filenames)
-    results['gnb_bow'] = [TP, FN, TN, FP]
+    TP, FN, FP, TN = gnb_bow.test(filenames)
+    results['gnb_bow'] = [TP, FN, FP, TN]
 
     gnb_tfidf = GNB_TFIDF(pos, neg, numReviews, occurPos, occurNeg)
     gnb_tfidf.train()
-    TP, FN, TN, FP = gnb_tfidf.test(filenames)
-    results['gnb_tfidf'] = [TP, FN, TN, FP]
+    TP, FN, FP, TN = gnb_tfidf.test(filenames)
+    results['gnb_tfidf'] = [TP, FN, FP, TN]
 
     mnb_bow = MNB_BOW(pos, neg)
     mnb_bow.train()
-    TP, FN, TN, FP = mnb_bow.test(filenames)
-    results['mnb_bow'] = [TP, FN, TN, FP]
+    TP, FN, FP, TN = mnb_bow.test(filenames)
+    results['mnb_bow'] = [TP, FN, FP, TN]
 
     mnb_tfidf = MNB_TFIDF(pos, neg, occurPos, occurNeg, numReviews)
     mnb_tfidf.train()
-    TP, FN, TN, FP = mnb_tfidf.test(filenames)
-    results['mnb_tfidf'] = [TP, FN, TN, FP]
+    TP, FN, FP, TN = mnb_tfidf.test(filenames)
+    results['mnb_tfidf'] = [TP, FN, FP, TN]
 
     print(results)
 

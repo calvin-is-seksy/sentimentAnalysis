@@ -25,6 +25,7 @@ class GNB_BOW:
         self.priorP = math.log(self.pCount / self.totalCount)
         self.priorN = math.log(self.nCount / self.totalCount)
 
+        # BoW
         for word, count in self.pos.items():
             self.features['pos'][word] = math.log((int(count) + 1) \
                                                           / (self.pCount + self.totalCount))
@@ -32,6 +33,7 @@ class GNB_BOW:
             self.features['neg'][word] = math.log((int(count) + 1) \
                                                           / (self.nCount + self.totalCount))
 
+        # Gaussian Naive Bayes
         self.weights['pos']['mean'] = sum(self.features['pos'].values()) / float(len(self.features['pos']))
         self.weights['neg']['mean'] = sum(self.features['neg'].values()) / float(len(self.features['neg']))
 
@@ -50,15 +52,17 @@ class GNB_BOW:
     def testHelper(self, validationSet, posTestCount, negTestCount):
         scoreP = self.priorP
         scoreN = self.priorN
-
         penaltyPos = math.log(1 / (self.pCount + self.totalCount)) * .6
         penaltyNeg = math.log(1 / (self.nCount + self.totalCount)) * .6
+
+        # print(penaltyPos, penaltyNeg)
 
         for line in lines(validationSet):
             words = line.strip().split()
             for feature in self.features:
                 if feature == 'pos':
                     for word in words:
+                        # print(scoreP)
                         if word in self.features['pos']:
                             bowCoeff = self.features['pos'][word]
                             mean = self.weights['pos']['mean']
@@ -68,7 +72,9 @@ class GNB_BOW:
                             scoreP += penaltyPos
 
                 elif feature == 'neg':
+                    # print("\n\n\n")
                     for word in words:
+                        # print(scoreN)
                         if word in self.features['neg']:
                             bowCoeff = self.features['neg'][word]
                             mean = self.weights['neg']['mean']
@@ -76,6 +82,10 @@ class GNB_BOW:
                             scoreN += self.calculateProbability(bowCoeff, mean, stddev)
                         elif word in self.features['pos']:
                             scoreN += penaltyNeg
+
+            # print(scoreP, scoreN)
+
+            # break
 
             if scoreP > scoreN:
                 posTestCount += 1

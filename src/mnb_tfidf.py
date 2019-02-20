@@ -25,6 +25,7 @@ class MNB_TFIDF:
         self.priorP = math.log(self.pCount / self.totalCount)
         self.priorN = math.log(self.nCount / self.totalCount)
 
+        # TF-IDF straight into Gaussian Naive Bayes
         for word, count in self.pos.items():
             TF = count / self.pCount
             IDF = math.log(self.numReviews / self.occurPos[word])
@@ -38,9 +39,8 @@ class MNB_TFIDF:
     def testHelper(self, validationSet, posTestCount, negTestCount):
         scoreP = self.priorP
         scoreN = self.priorN
-
-        penaltyPos = math.log(1 / (self.pCount + self.totalCount)) * .05
-        penaltyNeg = math.log(1 / (self.nCount + self.totalCount)) * .05
+        penaltyPos = math.log(1 / (self.pCount + self.totalCount)) * .005
+        penaltyNeg = math.log(1 / (self.nCount + self.totalCount)) * .005
 
         for line in lines(validationSet):
             words = line.strip().split()

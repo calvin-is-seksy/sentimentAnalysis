@@ -27,6 +27,7 @@ class GNB_TFIDF:
         self.priorP = math.log(self.pCount / self.totalCount)
         self.priorN = math.log(self.nCount / self.totalCount)
 
+        # TF-IDF
         for word, count in self.pos.items():
             TF = count / self.pCount
             IDF = math.log(self.numReviews / self.occurPos[word])
@@ -37,6 +38,7 @@ class GNB_TFIDF:
             IDF = math.log(self.numReviews / self.occurNeg[word])
             self.features['neg'][word] = TF * IDF
 
+        # Gaussian Naive Bayes
         self.weights['pos']['mean'] = sum(self.features['pos'].values()) / float(len(self.features['pos']))
         self.weights['neg']['mean'] = sum(self.features['neg'].values()) / float(len(self.features['neg']))
 
@@ -55,9 +57,8 @@ class GNB_TFIDF:
     def testHelper(self, validationSet, posTestCount, negTestCount):
         scoreP = self.priorP
         scoreN = self.priorN
-
-        penaltyPos = math.log(1 / (self.pCount + self.totalCount)) * 2500
-        penaltyNeg = math.log(1 / (self.nCount + self.totalCount)) * 2500
+        penaltyPos = math.log(1 / (self.pCount + self.totalCount)) * 2250
+        penaltyNeg = math.log(1 / (self.nCount + self.totalCount)) * 2250
 
         # print(penaltyPos, penaltyNeg)
 
@@ -66,6 +67,7 @@ class GNB_TFIDF:
             for feature in self.features:
                 if feature == 'pos':
                     for word in words:
+                        # print(scoreP)
                         if word in self.features['pos']:
                             tfidf = self.features['pos'][word]
                             mean = self.weights['pos']['mean']
@@ -74,11 +76,10 @@ class GNB_TFIDF:
                         elif word in self.features['neg']:
                             scoreP += penaltyPos
 
-                        # print(scoreP)
-
                 elif feature == 'neg':
                     # print('\n\n\n')
                     for word in words:
+                        # print(scoreN)
                         if word in self.features['neg']:
                             tfidf = self.features['neg'][word]
                             mean = self.weights['neg']['mean']
@@ -87,9 +88,9 @@ class GNB_TFIDF:
                         elif word in self.features['pos']:
                             scoreN += penaltyNeg
 
-                #         print(scoreN)
-                #
-                # print(scoreP, scoreN)
+            # print(scoreP, scoreN)
+
+            # break
 
             if scoreP > scoreN:
                 posTestCount += 1
